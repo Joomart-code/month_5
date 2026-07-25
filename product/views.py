@@ -51,7 +51,7 @@ def category_detail_api_view(request, id):
         
         
         
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def product_list_create_api_view(request):
     if request.method == 'GET':
         products = Product.objects.annotate(
@@ -128,11 +128,11 @@ def review_detail_api_view(request, id):
         )
     
     if request.method == 'GET':
-        serializer = ReviewSerializer(reviews).data
+        serializer = ReviewSerializer(review).data
         return Response(serializer)
     
     elif request.method == 'PUT':
-        serializer = ReviewSerializer(reviews, data=request.data)
+        serializer = ReviewSerializer(review, data=request.data)
         
         if serializer.is_valid():
             serializer.save()
@@ -141,5 +141,5 @@ def review_detail_api_view(request, id):
     
     
     elif request.method == 'DELETE':
-        reviews.delete()
+        review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
