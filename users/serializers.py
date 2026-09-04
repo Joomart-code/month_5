@@ -1,12 +1,13 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-
+User = get_user_model()
 
 class UserBaseSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=155)
-    password = serializers.CharField()
+    email = serializers.EmailField()
+    
+    password = serializers.CharField(write_only=True)
 
 
 class AuthValidateSerializer(UserBaseSerializer):
@@ -14,17 +15,17 @@ class AuthValidateSerializer(UserBaseSerializer):
 
 
 class RegisterValidateSerializer(UserBaseSerializer):
-     
-    def validate_username(self, username):  
-        try:
-            User.objects.get(username=username)
-            
-        except User.DoesNotExist:
-            return username
-        
-        raise ValidationError('Username already exists!')
     
-
+    phone_number = serializers.CharField(
+        required=False,
+     allow_blank=True
+     )
+     
+    def validate_email(self, email):  
+        
+        if User.objects.filter(email=email).exists():
+            raise ValidationError('Email already exists!')
+        return email
 
 class ConfirmCodeSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=6)

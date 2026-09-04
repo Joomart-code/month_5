@@ -1,6 +1,7 @@
 import random
+
 from rest_framework.decorators import api_view
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegisterValidateSerializer, AuthValidateSerializer, ConfirmCodeSerializer
@@ -9,19 +10,21 @@ from rest_framework.authtoken.models import Token
 from .models import ConfirmCode
 
 
-
+User = get_user_model()
 
 @api_view(['POST'])
 def registration_api_view(request):
     serializer = RegisterValidateSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     
-    username = serializer.validated_data['username']
+    email = serializer.validated_data['email']
     password = serializer.validated_data['password']
+    phone_number = serializer.validated_data.get('phone_number')
     
     user = User.objects.create_user(
-        username=username,
+        email=email,
         password=password,
+        phone_number=phone_number,  
         is_active=False
     )
     
@@ -75,7 +78,7 @@ def confirm_api_view(request):
             data={'error': 'Invalid code'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    user = confirm_code.user
+    user = confirm_code.user    
     
     user.is_active=True
     user.save()
